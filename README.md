@@ -1,4 +1,4 @@
-# Seq Data Cleanup
+# Automated Directory Cleanup
 
 A python script for removing files.
 
