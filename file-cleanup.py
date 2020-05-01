@@ -16,38 +16,54 @@ def read_config():
     return subdirs_to_clean, files_to_preserve
 
 def subdir_clean_recurse(root_dir, files_to_preserve, delete):
+    # folders = []
     for root, dirlist, filelist in os.walk(root_dir):
         for file in filelist: # loop through files in subdir
             preserve = False
             for suffix in files_to_preserve:
-                if file.endswith(suffix): # file suffix matches a preservation suffix
-                    fullpath = os.path.join(root, file) # get the full path to the file
+                fullpath = os.path.join(root, file) # get the full path to the file
+                # if "NextSeq" in fullpath:
+                    # preserve = False
+                    # break
+                elif file.endswith(suffix): # file suffix matches a preservation suffix
                     if delete == False: # for checking run, will print files that are marked to be preserved
-                        print(fullpath, "will be preserved")
+                        print("preserved:", fullpath)
                     preserve = True
                     break
             if delete == True and preserve == False: # remove the file
                 fullpath = os.path.join(root, file)
+                print(fullpath, "deleted")
                 os.remove(fullpath)
+            # elif delete == False and preserve == False:
+            #     fullpath = os.path.join(root, file)
+            #     folder = fullpath.split("/")[:-1]
+            #     folder = "/".join(folder)
+                # if folder not in folders:
+                #     folders.append(folder)
+    # for folder in folders:
+    #     print(folder, "will be cleaned")
+    return
 
 def file_recurse(root_dir, subdirs_to_clean, files_to_preserve, delete):
     for root, dirlist, filelist in os.walk(root_dir): # traverse through the directory to be cleaned
         if os.path.basename(root) in subdirs_to_clean: # folder matches a subdir to be cleaned
-            subdir_clean_recurse(os.path.basename(root), files_to_preserve, delete)
-        else:
             if delete == False:
-                if root == root_dir:
-                    for file in filelist:
-                        fullpath = os.path.join(root, file)
-                        print(fullpath, "will be preserved")
-                else:
-                    preserve_msg = True
-                    for dir in subdirs_to_clean:
-                        if dir in root.split("/"):
-                            preserve_msg = False
-                            break
-                    if preserve_msg == True:
-                        print("Everything inside ", "/" + os.path.basename(root), "will be preserved")
+                print(root, "will be cleaned")
+            subdir_clean_recurse(root, files_to_preserve, delete)
+        # else:
+        #     if delete == False:
+        #         if root == root_dir:
+        #             for file in filelist:
+        #                 fullpath = os.path.join(root, file)
+        #                 print(fullpath, "will be preserved")
+        #         else:
+        #             preserve_msg = True
+        #             for dir in subdirs_to_clean:
+        #                 if dir in root.split("/"):
+        #                     preserve_msg = False
+        #                     break
+        #             if preserve_msg == True:
+        #                 print("Everything inside ", "/" + os.path.basename(root), "will be preserved")
     return
 
 def yes_or_no(question):
