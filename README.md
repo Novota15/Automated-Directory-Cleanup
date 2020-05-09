@@ -1,4 +1,4 @@
-# Automated Directory Cleanup
+# Seq Data Cleanup
 
 A python script for removing files.
 
@@ -28,12 +28,16 @@ To use this program execute ```$ python3 file-cleanup.py COMMAND DIR_PATH```, wh
 * **check_files**: Displays the files that will be preserved if the delete command is run. It is recommended to run this first and make sure that you are okay with the output.
 * **delete_files**: Deletes all of the files inside the subfolders listed in *config.ini* except for files ending with the same suffixes listed in *config.ini*
 
+# Write deleted files list stdout to a file
+
+If you provide a path to a file as a third argument to the script when deleting files, the list of deleted files will be appended to that file.
+
 # Examples
 
 Checking if files will be preserved correctly:
 
 ```
-$ python3 file-cleanup.py /home/grant/Test check_files
+$ python3 file-cleanup.py check_files /home/grant/Test/
 filepath0 will be preserved
 filepath1 will be preserved
 ...
@@ -42,7 +46,7 @@ filepath1 will be preserved
 Executing file cleanup:
 
 ```
-$ python3 file-cleanup.py /home/grant/Test delete_files
+$ python3 file-cleanup.py delete_files /home/grant/Test/ /home/grant/docs/deleted_list.txt
 Are you ok with the files being preserved and ready to run clean-up? (y/n):y
 Files have been deleted
 ```
