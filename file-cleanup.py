@@ -15,7 +15,7 @@ def read_config():
         files_to_preserve.append(str(config['Files to Preserve Given Suffix'][suffix]))
     return subdirs_to_clean, files_to_preserve
 
-def subdir_clean_recurse(root_dir, files_to_preserve, delete):
+def subdir_clean_recurse(root_dir, files_to_preserve, delete, output_file):
     # folders = []
     for root, dirlist, filelist in os.walk(root_dir):
         for file in filelist: # loop through files in subdir
@@ -32,6 +32,8 @@ def subdir_clean_recurse(root_dir, files_to_preserve, delete):
                     break
             if delete == True and preserve == False: # remove the file
                 fullpath = os.path.join(root, file)
+                if output_file:
+                    output_file.write(fullpath + "deleted" + "\n")
                 print(fullpath, "deleted")
                 os.remove(fullpath)
             # elif delete == False and preserve == False:
@@ -44,12 +46,17 @@ def subdir_clean_recurse(root_dir, files_to_preserve, delete):
     #     print(folder, "will be cleaned")
     return
 
-def file_recurse(root_dir, subdirs_to_clean, files_to_preserve, delete):
+def file_recurse(root_dir, subdirs_to_clean, files_to_preserve, delete, output_file_name):
+    # open file for writing
+    if output_file_name:
+        output_file = open(output_file_name,"a")
+    else:
+        output_file = None
     for root, dirlist, filelist in os.walk(root_dir): # traverse through the directory to be cleaned
         if os.path.basename(root) in subdirs_to_clean: # folder matches a subdir to be cleaned
             if delete == False:
                 print(root, "will be cleaned")
-            subdir_clean_recurse(root, files_to_preserve, delete)
+            subdir_clean_recurse(root, files_to_preserve, delete, output_file)
         # else:
         #     if delete == False:
         #         if root == root_dir:
@@ -64,6 +71,8 @@ def file_recurse(root_dir, subdirs_to_clean, files_to_preserve, delete):
         #                     break
         #             if preserve_msg == True:
         #                 print("Everything inside ", "/" + os.path.basename(root), "will be preserved")
+    if output_file_name:
+        output_file.close()
     return
 
 def yes_or_no(question):
@@ -74,13 +83,13 @@ def yes_or_no(question):
         if reply[0] == 'n':
             return False
 
-def delete_files(root_path):
+def delete_files(root_path, output_file_name):
     if root_path != None:
         subdirs_to_clean, files_to_preserve = read_config()
         # check if the user is ok with the files being preserved
         response = yes_or_no("Are you ok with the files being preserved and ready to run clean-up?")
         if response == True:
-            file_recurse(root_path, subdirs_to_clean, files_to_preserve, True)
+            file_recurse(root_path, subdirs_to_clean, files_to_preserve, True, output_file_name)
             print("Files have been deleted")
         else:
             print("Program closed, no files have been deleted")
@@ -89,10 +98,10 @@ def delete_files(root_path):
         print("Directory path missing")
     return
 
-def check_files(root_path):
+def check_files(root_path, output_file_name):
     if root_path != None:
         subdirs_to_clean, files_to_preserve = read_config()
-        file_recurse(root_path, subdirs_to_clean, files_to_preserve, False)
+        file_recurse(root_path, subdirs_to_clean, files_to_preserve, False, output_file_name)
     else:
         print("Directory path missing")
     return
@@ -115,7 +124,12 @@ commands = {
 if len(argv) >= 2 and argv[1] in commands:
     read_config()
     if len(argv) > 2:
-        commands[argv[1]](argv[2])
+        try:
+            # user gave file path for output file
+            commands[argv[1]](argv[2], argv[3])
+        except:
+            # user did not provide output file path
+            commands[argv[1]](argv[2], None)
     else:
         commands[argv[1]](None)
 else:
